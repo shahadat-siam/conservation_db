@@ -1,6 +1,6 @@
 -- Active: 1750760985343@@127.0.0.1@5432@conservation_db
 CREATE DATABASE conservation_db;
-ALTER DATABASE rare_db RENAME TO conservation_db;
+ 
 CREATE TABLE rangers (
     ranger_id SERIAL PRIMARY KEY,
     name VARCHAR(50) NOT NULL,
@@ -26,7 +26,7 @@ INSERT INTO species (common_name, scientific_name, discovery_date, conservation_
 ('Red Panda', 'Ailurus fulgens', '1825-03-12', 'Endangered'),
 ('Javan Rhino', 'Rhinoceros sondaicus', '1822-09-10', 'Critically Endangered'),
 ('African Elephant', 'Loxodonta africana', '1758-01-01', 'Vulnerable'),
-('Amur Leopard', 'Panthera pardus orientalis', '1857-11-14', NULL);
+('Amur Leopard', 'Panthera pardus orientalis', '1857-11-14', 'Critically Endangered');
 SELECT * FROM species;
 
 CREATE TABLE sightings(
@@ -70,3 +70,36 @@ SELECT r.name, COUNT(s.species_id) AS total_sightings
 -- Problem No. 5
 SELECT s.common_name FROM species s LEFT JOIN sightings si ON s.species_id = si.species_id
   WHERE si.species_id IS NULL;
+
+
+-- Problem No. 6
+SELECT sp.common_name, s.sighting_time, r.name FROM sightings s 
+  JOIN species sp ON s.species_id = sp.species_id
+  JOIN rangers r ON s.ranger_id = r.ranger_id
+  ORDER BY s.sighting_time DESC
+  LIMIT 2;
+
+
+-- Problem No. 7
+UPDATE species SET conservation_status = 'Historic'
+   WHERE discovery_date < '1800-01-01';
+
+
+
+-- Problem No. 8
+SELECT sightings_id,
+  CASE
+   WHEN EXTRACT(HOUR FROM sighting_time) < 12 THEN 'Morning'
+   WHEN EXTRACT(HOUR FROM sighting_time) BETWEEN 12 AND 17 THEN 'Afternoon'
+   ElSE 'Evening'
+  END AS time_of_day
+  FROM sightings;
+
+
+
+-- Problem No. 9
+DELETE FROM rangers 
+  WHERE ranger_id NOT IN (
+    SELECT DISTINCT ranger_id FROM sightings
+  );
+ 
